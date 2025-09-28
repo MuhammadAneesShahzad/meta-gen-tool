@@ -18,11 +18,11 @@ const app = express();
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 
-// CORS - allow only your website domain
-const ALLOWED_ORIGINS = ['https://apextechagency.com']; // add your domain here
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
 app.use(cors({
-  origin: ALLOWED_ORIGINS
+  origin: ALLOWED_ORIGINS.length ? ALLOWED_ORIGINS : true
 }));
+
 
 // Rate limiting: basic abuse prevention
 const limiter = rateLimit({
