@@ -459,3 +459,111 @@ app.get('/', (req, res) => res.send('MetaGen Tool API is running. Use POST /api/
 // Start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`MetaGen server listening on port ${PORT}`));
+
+
+
+
+
+
+
+
+
+
+
+
+// Helper: build prompt for AI
+function buildPrompt(keyword, note = '', maxTitleChars = 60, maxMetaChars = 160) {
+  return `You are an expert SEO copywriter. Generate meta details for a blog post:
+
+Keyword: "${keyword}"
+Context: "${note}"
+
+Requirements:
+- Generate an array "titles" of 5 meta titles, each <= ${maxTitleChars} characters, include the keyword.
+- Generate an array "metas" of 3 meta descriptions, each <= ${maxMetaChars} characters, include the keyword.
+- Generate a slug suggestion suitable for a URL.
+Return ONLY strict JSON like:
+{
+  "titles": ["...","..."],
+  "metas": ["...","..."],
+  "slug": "your-slug-here"
+}`;
+}
+
+
+
+
+
+
+
+
+
+
+const fetch = global.fetch || require('node-fetch');
+const cheerio = require('cheerio');
+
+// Fetch page and extract main text (title, headings, meta description)
+async function scrapePage(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+    const html = await res.text();
+    const $ = cheerio.load(html);
+
+    // Grab text content
+    const title = $('title').text() || '';
+    const metaDesc = $('meta[name="description"]').attr('content') || '';
+    const h1 = $('h1').first().text() || '';
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 1000);
+
+    // Combine for AI prompt
+    const combined = [title, metaDesc, h1, bodyText].filter(Boolean).join('. ');
+
+    return combined;
+  } catch (err) {
+    console.error('Scraper failed:', err.message);
+    throw new Error('Failed to fetch the provided URL');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+// Endpoint: Generate meta from URL
+app.post('/api/meta-gen-url', async (req, res) => {
+  try {
+    const { url } = req.body || {};
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'URL is required and must be a string' });
+    }
+
+    // Scrape the page content
+    const content = await scrapePage(url);
+
+    // Build AI prompt using scraped content
+    const prompt = buildPrompt(content, 'Generate SEO metadata for this page');
+
+    // Call Google AI first
+    try {
+      const g = await callGoogle(prompt);
+      const parsed = parseJsonFromModel(g.raw);
+      return res.json({ provider: g.provider, parsed, meta: g.meta });
+    } catch (err) {
+      console.warn('Google failed:', err.message);
+      // fallback to OpenRouter
+      const o = await callOpenRouter(prompt);
+      const parsed = parseJsonFromModel(o.raw);
+      return res.json({ provider: o.provider, parsed, meta: o.meta });
+    }
+  } catch (err) {
+    console.error('URL meta-gen error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
