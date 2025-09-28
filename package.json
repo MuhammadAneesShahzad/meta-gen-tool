@@ -1,0 +1,20 @@
+{
+  "name": "meta-gen-tool",
+  "version": "1.0.0",
+  "description": "Meta Title & Description Generator - proxy with Google Gemini + OpenRouter fallback",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development nodemon server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "ioredis": "^5.3.2"
+  }
+}

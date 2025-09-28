@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Meta Title & Description Generator - Embed</title>
+</head>
+<body>
+  <h3>Meta Title & Description Generator</h3>
+  <form id="frm">
+    <input id="kw" placeholder="Keyword" required />
+    <button type="submit">Generate</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    const frm = document.getElementById('frm');
+    const resEl = document.getElementById('result');
+    frm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resEl.innerHTML = 'Working...';
+      const kw = document.getElementById('kw').value.trim();
+      const r = await fetch('/api/meta-gen', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ keyword: kw })});
+      const j = await r.json();
+      resEl.innerHTML = '<pre>'+JSON.stringify(j, null, 2)+'</pre>';
+    });
+  </script>
+</body>
+</html>
