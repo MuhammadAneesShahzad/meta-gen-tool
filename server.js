@@ -214,3 +214,14 @@ app.listen(PORT, () => console.log(`MetaGen server listening on port ${PORT}`));
 app.get("/", (req, res) => {
   res.send("MetaGen Tool API is running! Use the /generate endpoint to generate meta titles & descriptions.");
 });
+
+
+import cors from 'cors';
+// or for require()
+const cors = require('cors');
+
+app.use(cors({
+  origin: '*'  // or restrict to your domain for security
+}));
+
+
