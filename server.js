@@ -583,7 +583,6 @@ Return ONLY strict JSON like:
 
 
 const fetch = global.fetch || require('node-fetch');
-const cheerio = require('cheerio');
 
 // Fetch page and extract main text (title, headings, meta description)
 async function scrapePage(url) {
