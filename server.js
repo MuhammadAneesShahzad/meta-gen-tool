@@ -216,12 +216,4 @@ app.get("/", (req, res) => {
 });
 
 
-import cors from 'cors';
-// or for require()
-const cors = require('cors');
-
-app.use(cors({
-  origin: '*'  // or restrict to your domain for security
-}));
-
 
