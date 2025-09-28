@@ -8,3 +8,7 @@ This repository contains a small Node.js API that generates SEO meta titles and 
 - Optional Redis caching (via REDIS_URL)
 - Per-IP rate limiting
 - Minimal, secure server (keys kept server-side)
+
+## Quick start (local)
+1. Copy `.env.example` to `.env` and fill your API keys.
+2. Install deps:
