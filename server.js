@@ -456,6 +456,89 @@ app.post('/api/meta-from-url', async (req, res) => {
 // Root helpful message
 app.get('/', (req, res) => res.send('MetaGen Tool API is running. Use POST /api/meta-gen or POST /api/meta-from-url'));
 
+
+
+
+
+/**
+ * URL-based Meta Generator
+ * Paste this at the END of server.js
+ */
+const cheerio = require('cheerio');
+
+app.post('/api/meta-gen-url', async (req, res) => {
+  try {
+    const { url } = req.body || {};
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'URL is required and must be a string' });
+    }
+
+    // Step 1: Fetch the page
+    let html;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+      html = await response.text();
+    } catch (fetchErr) {
+      console.error('Fetch error:', fetchErr.message);
+      return res.status(400).json({ error: 'Failed to fetch the provided URL' });
+    }
+
+    // Step 2: Load HTML into Cheerio
+    const $ = cheerio.load(html);
+    const pageTitle = $('title').text().trim() || '';
+    const metaDescription = $('meta[name="description"]').attr('content') || '';
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 500); // optional sample text
+
+    // Step 3: Build prompt for AI
+    const promptText = `
+You are an expert SEO copywriter. Analyze the following page and generate:
+1) A meta title (<= 60 chars) that includes the main keywords.
+2) A meta description (<= 160 chars) optimized for Google.
+3) A slug suitable for a blog URL.
+
+Page details:
+Title: ${pageTitle}
+Meta Description: ${metaDescription}
+Content: ${bodyText}
+
+Return ONLY strict JSON:
+{"title":"...", "meta":"...", "slug":"..."}
+`;
+
+    // Step 4: Call AI (Google or OpenRouter fallback)
+    const aiResult = await (async () => {
+      try {
+        const g = await callGoogle(promptText);
+        return g.raw;
+      } catch (gErr) {
+        console.warn('Google failed, fallback to OpenRouter:', gErr.message || gErr);
+        const o = await callOpenRouter(promptText);
+        return o.raw;
+      }
+    })();
+
+    // Step 5: Parse JSON from AI response
+    const parsed = parseJsonFromModel(aiResult);
+
+    // Step 6: Return result
+    res.json({ provider: 'url-based', parsed });
+
+  } catch (err) {
+    console.error('URL meta generation error:', err);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
 // Start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`MetaGen server listening on port ${PORT}`));
@@ -567,3 +650,16 @@ app.post('/api/meta-gen-url', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
