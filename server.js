@@ -18,10 +18,10 @@ const app = express();
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 
-// CORS - adjust to restrict to your domain in production
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+// CORS - allow only your website domain
+const ALLOWED_ORIGINS = ['https://apextechagency.com']; // add your domain here
 app.use(cors({
-  origin: ALLOWED_ORIGINS.length ? ALLOWED_ORIGINS : true
+  origin: ALLOWED_ORIGINS
 }));
 
 // Rate limiting: basic abuse prevention
