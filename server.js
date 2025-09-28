@@ -43,7 +43,7 @@ app.use(express.json({ limit: '30kb' }));
     }
   });
 
-  const ALLOWED_ORIGINS = Array.from(aug.length ? aug : ['https://apextechagency.com', 'https://www.apextechagency.com']);
+  const ALLOWED_ORIGINS = Array.from(aug.length ? aug : ['https://apextechagency.com', 'https://www.apextechagency.com', 'https://tools-api.apextechagency.com']);
   // flexible CORS: allow unknown origins only if ALLOWED_ORIGINS contains '*'
   app.use(cors({
     origin: function (origin, callback) {
