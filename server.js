@@ -209,3 +209,8 @@ app.post('/api/meta-gen', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`MetaGen server listening on port ${PORT}`));
+
+
+app.get("/", (req, res) => {
+  res.send("MetaGen Tool API is running! Use the /generate endpoint to generate meta titles & descriptions.");
+});
