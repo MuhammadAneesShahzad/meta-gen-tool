@@ -18,10 +18,20 @@ const app = express();
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+const allowedOrigins = ['https://apextechagency.com', 'https://www.apextechagency.com'];
+
 app.use(cors({
-  origin: ALLOWED_ORIGINS.length ? ALLOWED_ORIGINS : true
+  origin: function(origin, callback) {
+    // allow requests with no origin (like Postman or server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'CORS policy: Access denied from this origin';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
 }));
+
 
 
 // Rate limiting: basic abuse prevention
